@@ -4,7 +4,6 @@ import java.util.*;
 public class Program {
     private final List<Operation> operations;
     
-    
     /**
      * Constructs a new instance of Program given a list of operations
      * the program should represent.
@@ -24,6 +23,11 @@ public class Program {
         return operations.size();
     }
     
+    
+    
+    public Operation getOperation(int index){
+        return operations.get(index);
+    }
     
     
     /**
@@ -127,6 +131,64 @@ public class Program {
         }
         
         return 0;
+    }
+    
+    
+    
+    /**
+     * Runs the program, returning the output string.
+     * @param timeOutLength
+     * @return
+     */
+    public String ProgramRunner(int timeOutLength){
+        assert(bracketsMatch());
+        
+        int pointer = 0;
+        int numberOfInstructions = 0;
+        String output = "";
+        List<Integer> data = new ArrayList<Integer>();
+        
+        for(int i=0; i < getLength(); i++){
+            Operation currentOperation = getOperation(i);
+            
+            if(currentOperation == Operation.INCREMENT_POINTER) pointer++;
+            else if(currentOperation == Operation.DECREMENT_POINTER) pointer--;
+            else if(currentOperation == Operation.INCREMENT_DATA){
+                if(data.get(pointer) != 255){
+                    data.add(pointer, data.get(pointer)+1);
+                } else{
+                    data.add(pointer, 0);
+                }
+            }
+            else if(currentOperation == Operation.DECREMENT_DATA){
+                if(data.get(pointer) != 0){
+                    data.add(pointer, data.get(pointer)-1);
+                } else{
+                    data.add(pointer,255);
+                }
+            }
+            else if(currentOperation == Operation.LOOP_BEGIN){
+                i = (data.get(pointer) == 0) ? findLoopEnd(i) : i;
+            }
+            else if(currentOperation == Operation.LOOP_END){
+                i = (data.get(pointer) != 0) ? findLoopStart(i) : i;
+            }
+            else if(currentOperation == Operation.PRINT){
+                output += (char)(int)(data.get(pointer));
+            }
+            
+            pointer = (pointer < 0) ? (pointer + data.size()) : pointer; // wrap pointer if negative
+            
+            if(pointer >= data.size()){ // increase the size of the list if the pointer is too large
+                data.add(0);
+            }
+            
+            if(numberOfInstructions > timeOutLength){
+                return "";
+            }      
+        }
+       
+        return output;
     }
 
 }
